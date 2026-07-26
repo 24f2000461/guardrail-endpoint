@@ -158,35 +158,57 @@ def guardrail():
     if tool == "read_file":
         path = args.get("path", "")
         ok, reason, real_path = check_read_file(path)
+
         if not ok:
-            return jsonify({"action": "block", "reason": reason})
+            return jsonify({"decision": "block", "reason": reason})
+
         try:
             with open(real_path, "r", errors="replace") as f:
-                content = f.read(100_000)
-            return jsonify({"action": "allow", "reason": reason, "result": {"content": content}})
+                content = f.read(100000)
+
+            return jsonify({
+                "decision": "allow",
+                "reason": reason,
+                "result": {
+                    "content": content
+                }
+            })
+
         except Exception as e:
-            return jsonify({"action": "block", "reason": f"read error: {e}"})
+            return jsonify({
+                "decision": "block",
+                "reason": f"read error: {e}"
+            })
 
     elif tool == "fetch_url":
         url = args.get("url", "")
         ok, reason = check_fetch_url(url)
+
         if not ok:
-            return jsonify({"action": "block", "reason": reason})
+            return jsonify({
+                "decision": "block",
+                "reason": reason
+            })
+
         try:
             resp = requests.get(url, timeout=5, allow_redirects=False)
+
             return jsonify({
-                "action": "allow",
+                "decision": "allow",
                 "reason": reason,
-                "result": {"status": resp.status_code, "body": resp.text[:5000]},
+                "result": {
+                    "status": resp.status_code,
+                    "body": resp.text[:5000]
+                }
             })
+
         except Exception as e:
-            return jsonify({"action": "block", "reason": f"fetch error: {e}"})
+            return jsonify({
+                "decision": "block",
+                "reason": f"fetch error: {e}"
+            })
 
-    return jsonify({"action": "block", "reason": "unknown tool"})
-
-
-seed_files()
-
-if __name__ == "__main__":
-    port = int(os.environ.get("PORT", "10000"))
-    app.run(host="0.0.0.0", port=port)
+    return jsonify({
+        "decision": "block",
+        "reason": "unknown tool"
+    })
