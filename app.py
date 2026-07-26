@@ -143,11 +143,13 @@ def check_fetch_url(url):
 # HTTP endpoint
 # ---------------------------------------------------------------------------
 @app.route("/", methods=["GET"])
+
 def health():
     return jsonify({"status": "ok"})
 
 
 @app.route("/", methods=["POST"])
+@app.route("/check", methods=["POST"])
 def guardrail():
     data = request.get_json(force=True, silent=True) or {}
     tool = data.get("tool")
