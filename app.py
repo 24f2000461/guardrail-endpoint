@@ -58,6 +58,7 @@ def seed_files():
             with open(path, "w") as f:
                 f.write(content)
         except Exception as e:
+            print(f"FAILED TO CREATE {path}: {e}", flush=True)
             app.logger.error("Failed to seed %s: %s", path, e)
 
 
